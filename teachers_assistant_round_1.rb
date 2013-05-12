@@ -1,11 +1,16 @@
 require 'csv'
 class Student
 
-  attr_accessor :scores, :name
+  attr_accessor :scores, :first_name, :last_name
 
-  def initialize(name)
-    @name = name
+  def initialize(first_name, last_name)
+    @first_name = first_name
+    @last_name = last_name
     @scores = []
+  end
+
+  def full_name
+    first_name + " " + last_name
   end
 
   def accumulate_grade(score)
@@ -17,7 +22,7 @@ class Student
     @scores.each do |score|
       total += score
     end
-    total / scores.length
+    total.to_f / scores.length
   end
 
   def average_grade
@@ -40,9 +45,10 @@ end
 
 class Cohort
 
-  attr_accessor :students
+  attr_accessor :name, :students
 
-  def initialize
+  def initialize(name)
+    @name = name
     @students = []
   end
 
@@ -50,19 +56,36 @@ class Cohort
     @students << student
   end
 
-  def print_students(options = {})
-    @students.each do |student|
-      puts "Name: #{student.name}"
+  def students_by_last_name
+    @students.sort { |a,b| a.last_name.downcase <=> b.last_name.downcase }
+  end
+
+  def stringify(options = {})
+    str = "Class: #{name}\n\n"
+    students_by_last_name.each do |student|
+      str += "Name: #{student.full_name}\n"
       if options[:grades]
-        print 'Grades: | ' 
+        str += 'Grades: | ' 
         student.scores.each do |score|
-          print "#{score} | "
+          str += "#{score} | "
         end
-        puts "\n"
+        str += "\n"
       end
-      print "Average score: #{student.average_score}\n" if options[:averages]
-      print "Average grade: #{student.average_grade}\n" if options[:average_grades]
-      puts "\n"
+      str += "Average score: #{student.average_score}\n" if options[:averages]
+      str += "Average grade: #{student.average_grade}\n" if options[:average_grades]
+      str += "\n"
+    end
+    str
+  end
+
+  def to_stdout(options = {})
+    print stringify(options)
+  end
+
+  def to_txt_file(options = {})
+    path = "#{@name}.txt" 
+    File.open(path, 'w') do |file|
+      file.puts stringify(options)
     end
   end
 
@@ -70,20 +93,27 @@ end
 
 class Parser
 
+  PATH = "sample_data.csv"
+
   def self.parse_csv
-    cohort = Cohort.new
-    CSV.foreach("sample_data.csv") do |row|
-      student = Student.new(row[0])
-      row.delete_at(0)
-      row.each do |grade|
-        student.accumulate_grade(grade)
+    begin
+      cohort = Cohort.new( File.basename(PATH, ".csv") )
+      CSV.foreach(PATH) do |row|
+        student_name = row[0].split()
+        student = Student.new(student_name[0], student_name[1])
+        row.delete_at(0)
+        row.each do |grade|
+          student.accumulate_grade(grade)
+        end
+        cohort.add_student(student)
       end
-      cohort.add_student(student)
+      cohort
+    rescue
+      puts "Error reading file"
     end
-    cohort
   end
 
 end
 
 c = Parser.parse_csv()
-c.print_students( {grades: true, averages: true, average_grades: :true} )
+c.to_txt_file ( {grades: true, averages: true, average_grades: :true} )
