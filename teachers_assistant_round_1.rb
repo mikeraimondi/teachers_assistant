@@ -9,7 +9,15 @@ class Student
   end
 
   def accumulate_grade(score)
-    @scores << score
+    @scores << score.to_i
+  end
+
+  def average_score
+    total = 0
+    @scores.each do |score|
+      total += score
+    end
+    total / scores.length
   end
 
 end
@@ -26,13 +34,17 @@ class Cohort
     @students << student
   end
 
-  def print_all
+  def print_students(options = {})
     @students.each do |student|
       puts "Name: #{student.name}"
-      print 'Grades: | ' 
-      student.scores.each do |score|
-        print "#{score} | "
+      if options[:print_grades]
+        print 'Grades: | ' 
+        student.scores.each do |score|
+          print "#{score} | "
+        end
+        puts "\n"
       end
+      print "Average score: #{student.average_score}" if options[:print_average]
       puts "\n\n"
     end
   end
@@ -57,4 +69,4 @@ class Parser
 end
 
 c = Parser.parse_csv()
-c.print_all
+c.print_students( {print_grades: true, print_average: true} )
