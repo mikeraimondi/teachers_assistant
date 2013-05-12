@@ -20,6 +20,22 @@ class Student
     total / scores.length
   end
 
+  def average_grade
+    average = average_score
+    case 
+    when average >= 90
+      'A'
+    when average >= 80
+      'B'
+    when average >= 70
+      'C'
+    when average >= 60
+      'D'
+    else
+      'F'
+    end
+  end
+
 end
 
 class Cohort
@@ -37,15 +53,16 @@ class Cohort
   def print_students(options = {})
     @students.each do |student|
       puts "Name: #{student.name}"
-      if options[:print_grades]
+      if options[:grades]
         print 'Grades: | ' 
         student.scores.each do |score|
           print "#{score} | "
         end
         puts "\n"
       end
-      print "Average score: #{student.average_score}" if options[:print_average]
-      puts "\n\n"
+      print "Average score: #{student.average_score}\n" if options[:averages]
+      print "Average grade: #{student.average_grade}\n" if options[:average_grades]
+      puts "\n"
     end
   end
 
@@ -69,4 +86,4 @@ class Parser
 end
 
 c = Parser.parse_csv()
-c.print_students( {print_grades: true, print_average: true} )
+c.print_students( {grades: true, averages: true, average_grades: :true} )
