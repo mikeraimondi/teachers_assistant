@@ -21,7 +21,7 @@ class Student
     total
   end
 
-  def accumulate_grade(score)
+  def accumulate_score(score)
     @scores << score.to_i
   end
 
@@ -106,8 +106,8 @@ class Cohort
     str = "Class: #{name}\n\n"
     students_by_last_name.each do |student|
       str += "Name: #{student.full_name}\n"
-      if options[:grades]
-        str += 'Grades: | ' 
+      if options[:scores]
+        str += 'Scores: | ' 
         student.scores.each do |score|
           str += "#{score} | "
         end
@@ -183,7 +183,7 @@ class Interface
              [-s|--stdout]<filename> <options>
 
       Valid options are:
-        grades
+        scores
         averages
         average_grades
         agg_total_score
@@ -215,7 +215,7 @@ class Interface
         num_grades = 0
         row.each do |grade|
           num_grades += 1
-          student.accumulate_grade(grade)
+          student.accumulate_score(grade)
         end
         prev_num_grades ||= num_grades
         if prev_num_grades != num_grades
