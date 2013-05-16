@@ -6,11 +6,11 @@ describe Loader do
   let(:loader) { Loader.new('sample_data.csv') }
   let(:parsed) {
     [
-        { first_name: 'Johnny', last_name: 'Smith', grades: [100, 80, 75, 78, 60] },
-        { first_name: 'Sally', last_name: 'Strong', grades: [100, 100, 90, 95, 85] },
-        { first_name: 'Jimmy', last_name: 'Fallon', grades: [95, 97, 85, 40, 85] },
-        { first_name: 'Chris', last_name: 'Botsworth', grades: [98, 86, 85, 82, 80] },
-        { first_name: 'Brian', last_name: 'Boyd', grades: [50, 60, 65, 70, 75] }
+        { first_name: 'Johnny', last_name: 'Smith', scores: [100, 80, 75, 78, 60] },
+        { first_name: 'Sally', last_name: 'Strong', scores: [100, 100, 90, 95, 85] },
+        { first_name: 'Jimmy', last_name: 'Fallon', scores: [95, 97, 85, 40, 85] },
+        { first_name: 'Chris', last_name: 'Botsworth', scores: [98, 86, 85, 82, 80] },
+        { first_name: 'Brian', last_name: 'Boyd', scores: [50, 60, 65, 70, 75] }
     ]
   }
 
@@ -38,21 +38,21 @@ describe Student do
     expect(student.full_name).to eql('Tim Foobar')
   end
 
-  it 'has grades' do
-    student.accumulate_grades([100,50])
-    expect(student.grades).to eql([100,50])
+  it 'has scores' do
+    student.accumulate_scores([100,50])
+    expect(student.scores).to eql([100,50])
   end
 
-  it 'appends new grades to existing grades' do
-    student.accumulate_grades([100,50])
-    student.accumulate_grades([50,100])
-    expect(student.grades).to eql([100,50,50,100])
+  it 'appends new scores to existing scores' do
+    student.accumulate_scores([100,50])
+    student.accumulate_scores([50,100])
+    expect(student.scores).to eql([100,50,50,100])
   end
 
-  it 'appends a single grade to existing grades' do
-    student.accumulate_grades([100,50])
-    student.accumulate_grades(75)
-    expect(student.grades).to eql([100,50,75])
+  it 'appends a single score to existing scores' do
+    student.accumulate_scores([100,50])
+    student.accumulate_scores(75)
+    expect(student.scores).to eql([100,50,75])
   end
 end
 
@@ -70,10 +70,10 @@ describe Cohort do
   it 'includes a student named Sally Strong' do
     sally = ''
     cohort.students.each { |student| sally = student if student.first_name == 'Sally' && student.last_name == 'Strong' }
-    expect(sally.grades).to eql([100, 100, 90, 95, 85])
+    expect(sally.scores).to eql([100, 100, 90, 95, 85])
   end
 
-  describe "Cohort stringification" do
+  describe "stringification" do
     let(:cohort_str) { cohort.stringify }
 
     it 'is 6 lines long' do
@@ -82,7 +82,7 @@ describe Cohort do
     end
 
     it 'has a header row' do
-      header = "      Name           |     Grades\n"
+      header = "      Name           |     Scores\n"
       first_line = cohort_str.lines.first
       expect(first_line).to eql(header)
     end
@@ -93,6 +93,21 @@ describe Cohort do
       line_array = cohort_str.lines.to_a
       expect(line_array).to include(sally)
     end
-  end
 
+    context "with student averages" do
+      let(:cohort_str) { cohort.stringify( {student_averages: true} ) }
+
+      it 'has a header row with an average column' do
+        header = "      Name           |Avg|     Scores\n"
+        first_line = cohort_str.lines.first
+        expect(first_line).to eql(header)
+      end
+
+      it 'has Sally with an average' do
+        sally =  "Sally Strong        | 94|100|100| 90| 95| 85|\n"
+        line_array = cohort_str.lines.to_a
+        expect(line_array).to include(sally)
+      end
+    end
+  end
 end
