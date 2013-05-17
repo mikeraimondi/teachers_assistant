@@ -54,8 +54,12 @@ class Student
     @scores.length
   end
 
+  def total_score
+    @scores.inject(0){|sum,x| sum + x }
+  end
+
   def average_score
-    (@scores.inject(0){|sum,x| sum + x }) / score_count
+    total_score / score_count.to_f
   end
 
   def grade
@@ -90,38 +94,39 @@ class Cohort
     end
   end
 
-  def format_col(col)
-    str = ""
-    if col.class == String
-      str << " "
-      str << "#{col}"
-      str << " "
-    else
-      if col.to_s.length == 2
-        str << " "
-      elsif col.to_s.length == 1
-        str << "  "
-      end
-      str << "#{col}"
-    end
-    str << "|"
+  def students_by_last_name
+    @students.sort { |a,b| a.last_name.downcase <=> b.last_name.downcase }
+  end
+
+  def format_col(col, width)
+    col = col.to_s.center(width)
+    col << "|"
   end
 
   def stringify(options = {student_scores: true})
     str = "      Name           |"
-    str << "Avg|" if options[:student_averages]
+    str << " Avg |" if options[:student_averages]
     str << "Grd|" if options[:student_grades]
     str << "     Scores" if options[:student_scores]
     str << "\n"
-    students.each do |student|
+    students_by_last_name.each do |student|
       str << "#{student.full_name}"
       (20 - student.full_name.length).times { str << " "}
       str << "|"
-      str << format_col(student.average_score) if options[:student_averages]
-      str << format_col(student.grade) if options[:student_grades]
-      student.scores.each { |score| str << format_col(score) } if options[:student_scores]
+      str << format_col(student.average_score, 5) if options[:student_averages]
+      str << format_col(student.grade, 3) if options[:student_grades]
+      student.scores.each { |score| str << format_col(score, 3) } if options[:student_scores]
       str << "\n"
     end
     str
+  end
+
+  def file_export
+    path = "#{@name}.txt"
+    str = stringify({ student_scores: true, student_averages: true,
+                      student_grades:true })
+    File.open(path, 'w') do |f|
+      f.write(str)
+    end
   end
 end

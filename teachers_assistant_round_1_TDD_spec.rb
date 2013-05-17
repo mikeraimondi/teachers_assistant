@@ -110,7 +110,7 @@ describe Cohort do
 
 
       it 'has Sally Strong' do
-        sally =  "Sally Strong        |100|100| 90| 95| 85|\n"
+        sally =  "Sally Strong        |100|100|90 |95 |85 |\n"
         line_array = cohort_str.lines.to_a
         expect(line_array).to include(sally)
       end
@@ -119,13 +119,13 @@ describe Cohort do
         let(:cohort_str) { cohort.stringify( {student_scores: true, student_averages: true} ) }
 
         it 'has a header row with an average column' do
-          header = "      Name           |Avg|     Scores\n"
+          header = "      Name           | Avg |     Scores\n"
           first_line = cohort_str.lines.first
           expect(first_line).to eql(header)
         end
 
         it 'has Sally with an average' do
-          sally =  "Sally Strong        | 94|100|100| 90| 95| 85|\n"
+          sally =  "Sally Strong        |94.0 |100|100|90 |95 |85 |\n"
           line_array = cohort_str.lines.to_a
           expect(line_array).to include(sally)
         end
@@ -141,11 +141,34 @@ describe Cohort do
         end
 
         it 'has Sally with a grade' do
-          sally =  "Sally Strong        | A |100|100| 90| 95| 85|\n"
+          sally =  "Sally Strong        | A |100|100|90 |95 |85 |\n"
           line_array = cohort_str.lines.to_a
           expect(line_array).to include(sally)
         end
       end
+    end
+
+  end
+
+  describe 'writes to a text file' do
+    let(:txt_file) { 'sample_data.txt' }
+
+    it 'creates a file' do
+      cohort.file_export
+      expect(File.exists?(txt_file)).to eql(true)
+    end
+
+    it 'has Sally listed' do
+      sally =  "Sally Strong        |94.0 | A |100|100|90 |95 |85 |\n"
+      cohort.file_export
+      expect(File.readlines(txt_file)).to include(sally)
+    end
+
+    it 'has Sally listed in the sixth row' do
+      sally =  "Sally Strong        |94.0 | A |100|100|90 |95 |85 |\n"
+      cohort.file_export
+      rows = File.readlines(txt_file)
+      expect(rows[5]).to eql(sally)
     end
 
   end
