@@ -76,13 +76,13 @@ describe Cohort do
   describe "stringification" do
     let(:cohort_str) { cohort.stringify({}) }
 
-    it 'is 6 lines long' do
+    it 'is 7 lines long' do
       line_count = cohort_str.lines.count
-      expect(line_count).to eql(6)
+      expect(line_count).to eql(7)
     end
 
     it 'has a header row' do
-      header = "      Name           |\n"
+      header = "      Name          |\n"
       first_line = cohort_str.lines.first
       expect(first_line).to eql(header)
     end
@@ -97,13 +97,13 @@ describe Cohort do
     context "with scores" do
       let(:cohort_str) { cohort.stringify({student_scores: true}) }
 
-      it 'is 6 lines long' do
+      it 'is 7 lines long' do
         line_count = cohort_str.lines.count
-        expect(line_count).to eql(6)
+        expect(line_count).to eql(7)
       end
 
       it 'has a header row' do
-        header = "      Name           |     Scores\n"
+        header = "      Name          |     Scores\n"
         first_line = cohort_str.lines.first
         expect(first_line).to eql(header)
       end
@@ -119,7 +119,7 @@ describe Cohort do
         let(:cohort_str) { cohort.stringify( {student_scores: true, student_averages: true} ) }
 
         it 'has a header row with an average column' do
-          header = "      Name           | Avg |     Scores\n"
+          header = "      Name          | Avg |     Scores\n"
           first_line = cohort_str.lines.first
           expect(first_line).to eql(header)
         end
@@ -135,7 +135,7 @@ describe Cohort do
         let(:cohort_str) { cohort.stringify( {student_scores: true, student_grades: true} ) }
 
         it 'has a header row with a grade column' do
-          header = "      Name           |Grd|     Scores\n"
+          header = "      Name          |Grd|     Scores\n"
           first_line = cohort_str.lines.first
           expect(first_line).to eql(header)
         end
@@ -148,10 +148,45 @@ describe Cohort do
       end
     end
 
+    context 'with aggregate information' do
+      let(:cohort_str) { cohort.stringify( {aggregate_information: true} ) }
+
+      it 'is 12 lines long' do
+        line_count = cohort_str.lines.count
+        expect(line_count).to eql(12)
+      end
+
+      it 'has the average score on line 9' do
+        actual_line = cohort_str.lines.to_a[8].chomp
+        expected_line = "Class-wide average score: 80.64"
+        expect(actual_line).to eql(expected_line)
+      end
+
+      it 'has the minimum score on line 10' do
+        actual_line = cohort_str.lines.to_a[9].chomp
+        expected_line = "Class-wide minimum score: 40"
+        expect(actual_line).to eql(expected_line)
+      end
+
+      it 'has the maximum score on line 11' do
+        actual_line = cohort_str.lines.to_a[10].chomp
+        expected_line = "Class-wide maximum score: 100"
+        expect(actual_line).to eql(expected_line)
+      end
+
+      it 'has the standard deviation on line 12' do
+        actual_line = cohort_str.lines.to_a[11].chomp
+        expected_line = "Class-wide standard deviation: 15.71"
+        expect(actual_line).to eql(expected_line)
+      end
+
+    end
+
   end
 
   describe 'writes to a text file' do
     let(:txt_file) { 'sample_data.txt' }
+    let(:sally) { "Sally Strong        |94.0 | A |100|100|90 |95 |85 |\n" }
 
     it 'creates a file' do
       cohort.file_export
@@ -159,13 +194,11 @@ describe Cohort do
     end
 
     it 'has Sally listed' do
-      sally =  "Sally Strong        |94.0 | A |100|100|90 |95 |85 |\n"
       cohort.file_export
       expect(File.readlines(txt_file)).to include(sally)
     end
 
     it 'has Sally listed in the sixth row' do
-      sally =  "Sally Strong        |94.0 | A |100|100|90 |95 |85 |\n"
       cohort.file_export
       rows = File.readlines(txt_file)
       expect(rows[5]).to eql(sally)

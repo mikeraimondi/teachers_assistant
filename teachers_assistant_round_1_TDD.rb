@@ -94,6 +94,44 @@ class Cohort
     end
   end
 
+  def all_scores
+    scores = []
+    @students.each do |student|
+      student.scores.each do |score|
+        scores << score
+      end
+    end
+    scores
+  end
+
+  def total_score
+    total = 0
+    all_scores.each do |score|
+      total += score
+    end
+    total
+  end
+
+  def average_score
+    total = total_score
+    total_score.to_f / all_scores.length
+  end
+
+  def standard_deviation
+    average = average_score
+    diffs = []
+    all_scores.each do |score|
+      diff = (score - average)
+      diff = diff * diff
+      diffs << diff
+    end
+    total_diffs = 0
+    diffs.each do |diff|
+      total_diffs += diff
+    end
+    Math.sqrt(total_diffs / diffs.length)
+  end
+
   def students_by_last_name
     @students.sort { |a,b| a.last_name.downcase <=> b.last_name.downcase }
   end
@@ -104,7 +142,7 @@ class Cohort
   end
 
   def stringify(options = {student_scores: true})
-    str = "      Name           |"
+    str = "      Name          |"
     str << " Avg |" if options[:student_averages]
     str << "Grd|" if options[:student_grades]
     str << "     Scores" if options[:student_scores]
@@ -118,6 +156,14 @@ class Cohort
       student.scores.each { |score| str << format_col(score, 3) } if options[:student_scores]
       str << "\n"
     end
+    str << "\n"
+    if options[:aggregate_information]
+      str << "---Aggregate information---\n"
+      str << "Class-wide average score: #{average_score}\n"
+      str << "Class-wide minimum score: #{all_scores.min}\n"
+      str << "Class-wide maximum score: #{all_scores.max}\n"
+      str << "Class-wide standard deviation: #{standard_deviation.round(2)}\n"
+    end
     str
   end
 
@@ -130,3 +176,7 @@ class Cohort
     end
   end
 end
+
+c = Cohort.new('sample_data.csv')
+puts c.stringify({student_scores: true, student_averages: true,
+                  student_grades: true, aggregate_information: true})
