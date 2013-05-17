@@ -74,7 +74,7 @@ describe Cohort do
   end
 
   describe "stringification" do
-    let(:cohort_str) { cohort.stringify }
+    let(:cohort_str) { cohort.stringify({}) }
 
     it 'is 6 lines long' do
       line_count = cohort_str.lines.count
@@ -82,32 +82,71 @@ describe Cohort do
     end
 
     it 'has a header row' do
-      header = "      Name           |     Scores\n"
+      header = "      Name           |\n"
       first_line = cohort_str.lines.first
       expect(first_line).to eql(header)
     end
 
 
     it 'has Sally Strong' do
-      sally =  "Sally Strong        |100|100| 90| 95| 85|\n"
+      sally =  "Sally Strong        |\n"
       line_array = cohort_str.lines.to_a
       expect(line_array).to include(sally)
     end
 
-    context "with student averages" do
-      let(:cohort_str) { cohort.stringify( {student_averages: true} ) }
+    context "with scores" do
+      let(:cohort_str) { cohort.stringify({student_scores: true}) }
 
-      it 'has a header row with an average column' do
-        header = "      Name           |Avg|     Scores\n"
+      it 'is 6 lines long' do
+        line_count = cohort_str.lines.count
+        expect(line_count).to eql(6)
+      end
+
+      it 'has a header row' do
+        header = "      Name           |     Scores\n"
         first_line = cohort_str.lines.first
         expect(first_line).to eql(header)
       end
 
-      it 'has Sally with an average' do
-        sally =  "Sally Strong        | 94|100|100| 90| 95| 85|\n"
+
+      it 'has Sally Strong' do
+        sally =  "Sally Strong        |100|100| 90| 95| 85|\n"
         line_array = cohort_str.lines.to_a
         expect(line_array).to include(sally)
       end
+
+      context "and with student averages" do
+        let(:cohort_str) { cohort.stringify( {student_scores: true, student_averages: true} ) }
+
+        it 'has a header row with an average column' do
+          header = "      Name           |Avg|     Scores\n"
+          first_line = cohort_str.lines.first
+          expect(first_line).to eql(header)
+        end
+
+        it 'has Sally with an average' do
+          sally =  "Sally Strong        | 94|100|100| 90| 95| 85|\n"
+          line_array = cohort_str.lines.to_a
+          expect(line_array).to include(sally)
+        end
+      end
+
+      context "and with student grades" do
+        let(:cohort_str) { cohort.stringify( {student_scores: true, student_grades: true} ) }
+
+        it 'has a header row with a grade column' do
+          header = "      Name           |Grd|     Scores\n"
+          first_line = cohort_str.lines.first
+          expect(first_line).to eql(header)
+        end
+
+        it 'has Sally with a grade' do
+          sally =  "Sally Strong        | A |100|100| 90| 95| 85|\n"
+          line_array = cohort_str.lines.to_a
+          expect(line_array).to include(sally)
+        end
+      end
     end
+
   end
 end

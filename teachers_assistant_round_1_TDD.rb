@@ -58,6 +58,22 @@ class Student
     (@scores.inject(0){|sum,x| sum + x }) / score_count
   end
 
+  def grade
+    avg = average_score
+    case
+    when avg >= 90
+      'A'
+    when avg >= 80
+      'B'
+    when avg >= 70
+      'C'
+    when avg >= 60
+      'D'
+    else
+      'F'
+    end
+  end
+
 end
 
 class Cohort
@@ -76,25 +92,34 @@ class Cohort
 
   def format_col(col)
     str = ""
-    if col.to_s.length == 2
+    if col.class == String
       str << " "
-    elsif col.to_s.length == 1
-      str << "  "
+      str << "#{col}"
+      str << " "
+    else
+      if col.to_s.length == 2
+        str << " "
+      elsif col.to_s.length == 1
+        str << "  "
+      end
+      str << "#{col}"
     end
-    str << "#{col}"
     str << "|"
   end
 
-  def stringify(options = {})
+  def stringify(options = {student_scores: true})
     str = "      Name           |"
     str << "Avg|" if options[:student_averages]
-    str << "     Scores\n"
+    str << "Grd|" if options[:student_grades]
+    str << "     Scores" if options[:student_scores]
+    str << "\n"
     students.each do |student|
       str << "#{student.full_name}"
       (20 - student.full_name.length).times { str << " "}
       str << "|"
       str << format_col(student.average_score) if options[:student_averages]
-      student.scores.each { |score| str << format_col(score) }
+      str << format_col(student.grade) if options[:student_grades]
+      student.scores.each { |score| str << format_col(score) } if options[:student_scores]
       str << "\n"
     end
     str
